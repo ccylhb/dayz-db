@@ -1,0 +1,94 @@
+---
+import Base from "../layouts/Base.astro";
+import Related from "../components/Related.astro";
+import food from "../data/dayz_food.json";
+
+const items = food
+  .map((x) => ({
+    slug: x.slug,
+    name: x.title,
+    energy: parseFloat(x.fields?.energy ?? "") || 0,
+    water: parseFloat(x.fields?.water ?? "") || 0,
+    stomach: parseFloat(x.fields?.stomach ?? "") || 0,
+    icon: x.icon_file || "",
+  }))
+  .filter((x) => x.energy > 0 || x.water > 0)
+  .sort((a, b) => a.name.localeCompare(b.name));
+---
+<Base
+  title="DayZ Food Calculator — plan your energy, water & stomach intake"
+  description="Pick DayZ food items and see total energy, water and stomach slots — plan a day of survival eating in your browser."
+>
+  <h1>Food Calculator</h1>
+  <p class="muted">Pick what you plan to eat — totals update live. A full character has 100 stomach slots and needs roughly 3,000+ kcal and 2,500+ ml per in-game day of hard activity.</p>
+
+  <div class="grid grid-2" style="margin:1rem 0">
+    <div class="card">
+      <strong>1 · Pick items</strong>
+      <input id="q" type="search" placeholder="Filter food..." style="width:100%;max-width:320px;margin:0.5rem 0" />
+      <select id="pick" size="12" style="width:100%">
+        {items.map((x) => <option value={x.slug}>{x.name} ({x.energy} kcal / {x.water} ml)</option>)}
+      </select>
+      <button id="add" style="margin-top:0.5rem">Add →</button>
+    </div>
+    <div class="card">
+      <strong>2 · Your plan</strong>
+      <ul id="plan" style="min-height:180px"></ul>
+      <div class="stat-row" style="margin-top:0.75rem">
+        <div><div class="stat-num" id="tEnergy">0</div><div class="stat-label">Energy (kcal)</div></div>
+        <div><div class="stat-num" id="tWater">0</div><div class="stat-label">Water (ml)</div></div>
+        <div><div class="stat-num" id="tStomach">0</div><div class="stat-label">Stomach slots</div></div>
+      </div>
+      <p id="verdict" class="muted" style="margin-top:0.5rem"></p>
+      <button id="clear" style="background:var(--bg-soft);color:var(--text);border:1px solid var(--border)">Clear</button>
+    </div>
+  </div>
+
+  <script define:vars={{ items }}>
+    const plan = [];
+    const bySlug = Object.fromEntries(items.map((x) => [x.slug, x]));
+    const q = document.getElementById("q");
+    const pick = document.getElementById("pick");
+    const listEl = document.getElementById("plan");
+    const tE = document.getElementById("tEnergy");
+    const tW = document.getElementById("tWater");
+    const tS = document.getElementById("tStomach");
+    const verdict = document.getElementById("verdict");
+    const render = () => {
+      listEl.innerHTML = plan.map((s, i) => {
+        const it = bySlug[s];
+        return `<li>${it.name} — ${it.energy} kcal, ${it.water} ml, ${it.stomach} slots <button data-i="${i}" style="padding:0 0.4rem;font-size:0.75rem">×</button></li>`;
+      }).join("");
+      const e = plan.reduce((a, s) => a + bySlug[s].energy, 0);
+      const w = plan.reduce((a, s) => a + bySlug[s].water, 0);
+      const st = plan.reduce((a, s) => a + bySlug[s].stomach, 0);
+      tE.textContent = e; tW.textContent = w; tS.textContent = st;
+      verdict.textContent = e >= 3000 && w >= 2500
+        ? "✓ Covers a hard day of survival."
+        : st > 100 ? "⚠ Over stomach capacity for one sitting — split into multiple meals."
+        : "Below a full day of hard activity — add more.";
+      listEl.querySelectorAll("button").forEach((b) =>
+        b.addEventListener("click", () => { plan.splice(+b.dataset.i, 1); render(); }));
+    };
+    document.getElementById("add").addEventListener("click", () => {
+      if (pick.value) { plan.push(pick.value); render(); }
+    });
+    document.getElementById("clear").addEventListener("click", () => { plan.length = 0; render(); });
+    const filter = () => {
+      const v = q.value.trim().toLowerCase();
+      Array.from(pick.options).forEach((o) => {
+        o.hidden = v && !o.textContent.toLowerCase().includes(v);
+      });
+    };
+    q.addEventListener("input", filter);
+    render();
+  </script>
+
+  <Related
+    links={[
+      { href: "/food/", title: "Food & Nutrition", sub: "All food values" },
+      { href: "/rankings/", title: "Rankings", sub: "Best foods & ammo" },
+      { href: "/ammo/", title: "Ammo Chart", sub: "Damage per caliber" },
+    ]}
+  />
+</Base>

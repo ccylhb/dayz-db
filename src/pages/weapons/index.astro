@@ -1,0 +1,48 @@
+---
+import Base from "../../layouts/Base.astro";
+import DataTable from "../../components/DataTable.astro";
+import Related from "../../components/Related.astro";
+import weapons from "../../data/dayz_weapons.json";
+
+const fv = (it, k) => it.fields?.[k] || "";
+const rows = weapons
+  .map((x) => ({
+    name: `<a href="/weapons/${x.slug}/">${x.title}</a>${x.icon_file ? ` <img src="/icons/${x.icon_file}" alt="" width="22" height="22" style="vertical-align:middle" loading="lazy" />` : ""}`,
+    _sort: x.title.toLowerCase(),
+    cat: fv(x, "category"),
+    mode: fv(x, "mode").slice(0, 30),
+    rof: fv(x, "rateoffire").slice(0, 28),
+    recoil: fv(x, "recoil"),
+    size: fv(x, "size"),
+    weight: fv(x, "weight"),
+  }))
+  .sort((a: any, b: any) => a._sort.localeCompare(b._sort));
+---
+<Base
+  title={`DayZ Weapons — ${weapons.length} weapons with stats`}
+  description={`DayZ weapon database: rate of fire, recoil, noise, size and weight for ${weapons.length} weapons — rifles, pistols, shotguns, melee and more.`}
+>
+  <h1>DayZ Weapons</h1>
+  <p class="muted">{weapons.length} weapons · fire mode, rate of fire, recoil, noise, size and weight.</p>
+  <DataTable
+    id="weapons"
+    rows={rows as any}
+    searchPlaceholder="Search weapons..."
+    columns={[
+      { key: "name", label: "Weapon" },
+      { key: "cat", label: "Category" },
+      { key: "mode", label: "Fire mode" },
+      { key: "rof", label: "Rate of fire" },
+      { key: "recoil", label: "Recoil" },
+      { key: "size", label: "Size" },
+      { key: "weight", label: "Weight (g)", type: "number" },
+    ]}
+  />
+  <Related
+    links={[
+      { href: "/ammo/", title: "Ammo Damage", sub: "Match caliber to damage" },
+      { href: "/magazines/", title: "Magazines", sub: "Capacities & compatibility" },
+      { href: "/rankings/", title: "Rankings", sub: "Leaderboards" },
+    ]}
+  />
+</Base>

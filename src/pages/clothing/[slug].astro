@@ -1,0 +1,43 @@
+---
+import Base from "../../layouts/Base.astro";
+import Related from "../../components/Related.astro";
+import EntryStats from "../../components/EntryStats.astro";
+import entries from "../../data/dayz_clothing.json";
+
+export function getStaticPaths() {
+  return entries.map((x: any) => ({ params: { slug: x.slug }, props: { x } }));
+}
+
+const { x } = Astro.props as any;
+const f = x.fields || {};
+const similar = entries.filter((o: any) => o.slug !== x.slug).slice(0, 6);
+---
+<Base
+  title=`${x.title} — DayZ clothing stats`
+  description=`${x.title}: DayZ clothing stats and details.`
+>
+  <h1 class="icon-h1">
+    {x.icon_file ? <img src={`/icons/${x.icon_file}`} alt={x.title} loading="eager" /> : null}
+    <span>{x.title}</span>
+  </h1>
+  {f.description && <p class="muted">{f.description}</p>}
+  <EntryStats entry={x} keys={["inventoryslot", "insulation", "durability", "projh", "projb", "projs", "size", "capacity", "weight"]} labels={{'inventoryslot': 'Slot', 'insulation': 'Insulation', 'durability': 'Durability', 'projh': 'Bullet prot. head', 'projb': 'Bullet prot. body', 'projs': 'Bullet prot. legs'}} />
+  <p>
+    {f.rarity && <span class="tag" style="margin:0.1rem">{f.rarity}</span>}
+    {f.location && <span class="tag" style="margin:0.1rem">Loot: {String(f.location).slice(0, 60)}</span>}
+    {f.variants && <span class="tag" style="margin:0.1rem">Variants: {f.variants}</span>}
+  </p>
+  {x.intro && <p>{x.intro}</p>}
+  <Related
+    links={[
+      ...similar.map((s: any) => ({
+        href: `/clothing/${s.slug}/`,
+        title: s.title,
+        sub: `${s.fields?.category || s.template || ""}`,
+        icon: s.icon_file ? `/icons/${s.icon_file}` : undefined,
+      })),
+      { href: "/clothing/", title: "All Clothing", sub: "Sortable table" },
+      { href: "/", title: "Home", sub: "All boards" },
+    ] as any}
+  />
+</Base>

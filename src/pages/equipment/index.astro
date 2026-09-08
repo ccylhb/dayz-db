@@ -1,0 +1,33 @@
+---
+import Base from "../../layouts/Base.astro";
+import DataTable from "../../components/DataTable.astro";
+import Related from "../../components/Related.astro";
+import entries from "../../data/dayz_equipment.json";
+
+const rows = entries
+  .map((x) => ({
+    name: `<a href="/equipment/${x.slug}/">${x.title}</a>${x.icon_file ? ` <img src="/icons/${x.icon_file}" alt="" width="22" height="22" style="vertical-align:middle" loading="lazy" />` : ""}`,
+    _sort: x.title.toLowerCase(),
+    category: String(x.fields?.["category"] ?? "").slice(0, 40),
+    size: String(x.fields?.["size"] ?? "").slice(0, 40),
+    weight: (v => isNaN(v) ? "" : v)(parseFloat(x.fields?.["weight"] ?? "")),
+  }))
+  .sort((a: any, b: any) => a._sort.localeCompare(b._sort));
+---
+<Base
+  title=`DayZ Equipment — containers, tools & medical — ${entries.length} entries`
+  description="DayZ equipment database: containers, tools, medical and navigation items with size, capacity and weight."
+>
+  <h1>DayZ Equipment</h1>
+  <p class="muted">${entries.length} entries · click a column to sort, use the box to filter.</p>
+  <DataTable id="equipment" rows={rows as any} searchPlaceholder="Search..." columns={[
+      { key: "name", label: "Item" },
+      { key: "category", label: "Category" },
+      { key: "size", label: "Size" },
+      { key: "weight", label: "Weight (g)", type: "number" },
+  ] as any} />
+  <Related links={[
+    { href: "/clothing/", title: "Clothing", sub: "Insulation & protection" },
+    { href: "/food/", title: "Food & Nutrition", sub: "Survival values" },
+  ] as any} />
+</Base>

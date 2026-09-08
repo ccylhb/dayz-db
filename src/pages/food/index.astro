@@ -1,0 +1,49 @@
+---
+import Base from "../../layouts/Base.astro";
+import DataTable from "../../components/DataTable.astro";
+import Related from "../../components/Related.astro";
+import food from "../../data/dayz_food.json";
+
+const fv = (it, k) => {
+  const v = parseFloat(it.fields?.[k] ?? "");
+  return isNaN(v) ? "" : v;
+};
+const rows = food
+  .map((x) => ({
+    name: `<a href="/food/${x.slug}/">${x.title}</a>${x.icon_file ? ` <img src="/icons/${x.icon_file}" alt="" width="22" height="22" style="vertical-align:middle" loading="lazy" />` : ""}`,
+    _sort: x.title.toLowerCase(),
+    energy: fv(x, "energy"),
+    water: fv(x, "water"),
+    stomach: fv(x, "stomach"),
+    variants: (x.fields?.variant || "").slice(0, 60),
+    location: (x.fields?.location || "").slice(0, 50),
+  }))
+  .sort((a: any, b: any) => a._sort.localeCompare(b._sort));
+---
+<Base
+  title={`DayZ Food & Drink — ${food.length} items with energy, water & stomach values`}
+  description={`Complete DayZ food database: energy kcal, water and stomach slots for ${food.length} food and drink items — raw, baked, boiled and rotten variants.`}
+>
+  <h1>DayZ Food & Nutrition</h1>
+  <p class="muted">{food.length} items · energy (kcal), water and stomach fullness. Click a column to sort.</p>
+  <DataTable
+    id="food"
+    rows={rows as any}
+    searchPlaceholder="Search food..."
+    columns={[
+      { key: "name", label: "Item" },
+      { key: "energy", label: "Energy (kcal)", type: "number" },
+      { key: "water", label: "Water (ml)", type: "number" },
+      { key: "stomach", label: "Stomach", type: "number" },
+      { key: "variants", label: "Variants" },
+      { key: "location", label: "Location" },
+    ]}
+  />
+  <Related
+    links={[
+      { href: "/food-calculator/", title: "Food Calculator", sub: "Plan your daily intake", tool: true },
+      { href: "/rankings/", title: "Rankings", sub: "Best energy & water foods" },
+      { href: "/ammo/", title: "Ammo Damage", sub: "Health, shock & blood damage" },
+    ]}
+  />
+</Base>

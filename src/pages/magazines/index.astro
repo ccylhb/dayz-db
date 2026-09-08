@@ -1,0 +1,33 @@
+---
+import Base from "../../layouts/Base.astro";
+import DataTable from "../../components/DataTable.astro";
+import Related from "../../components/Related.astro";
+import entries from "../../data/dayz_magazines.json";
+
+const rows = entries
+  .map((x) => ({
+    name: `<a href="/magazines/${x.slug}/">${x.title}</a>${x.icon_file ? ` <img src="/icons/${x.icon_file}" alt="" width="22" height="22" style="vertical-align:middle" loading="lazy" />` : ""}`,
+    _sort: x.title.toLowerCase(),
+    capacity: String(x.fields?.["capacity"] ?? "").slice(0, 40),
+    weapon: String(x.fields?.["weapon"] ?? "").slice(0, 40),
+    weight: (v => isNaN(v) ? "" : v)(parseFloat(x.fields?.["weight"] ?? "")),
+  }))
+  .sort((a: any, b: any) => a._sort.localeCompare(b._sort));
+---
+<Base
+  title=`DayZ Magazines — ${entries.length} entries`
+  description="DayZ magazine database: capacity, compatible weapons, size and weight for every magazine."
+>
+  <h1>DayZ Magazines & Capacity</h1>
+  <p class="muted">${entries.length} entries · click a column to sort, use the box to filter.</p>
+  <DataTable id="magazines" rows={rows as any} searchPlaceholder="Search..." columns={[
+      { key: "name", label: "Magazine" },
+      { key: "capacity", label: "Capacity" },
+      { key: "weapon", label: "Used by" },
+      { key: "weight", label: "Weight (g)", type: "number" },
+  ] as any} />
+  <Related links={[
+    { href: "/ammo/", title: "Ammo Damage", sub: "Damage per caliber" },
+    { href: "/weapons/", title: "All Weapons", sub: "Weapon stats" },
+  ] as any} />
+</Base>

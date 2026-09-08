@@ -1,0 +1,110 @@
+---
+import Base from "../layouts/Base.astro";
+import Related from "../components/Related.astro";
+import food from "../data/dayz_food.json";
+import ammo from "../data/dayz_ammo.json";
+import weapons from "../data/dayz_weapons.json";
+import clothing from "../data/dayz_clothing.json";
+
+const fv = (it, k) => {
+  const v = parseFloat(it.fields?.[k] ?? "");
+  return isNaN(v) ? 0 : v;
+};
+const top = (arr, k, n = 10) =>
+  arr.map((x) => ({ ...x, v: fv(x, k) })).filter((x) => x.v > 0).sort((a, b) => b.v - a.v).slice(0, n);
+const topEnergy = top(food, "energy");
+const topWater = top(food, "water");
+const topAmmo = top(ammo, "healthdmg");
+const topAmmoShock = top(ammo, "shockdmg");
+const topInsul = top(clothing, "insulation");
+const quietest = weapons
+  .filter((x) => /quiet/i.test(x.fields?.noise || ""))
+  .slice(0, 8);
+---
+<Base title="DayZ Rankings — best food, ammo & clothing" description="DayZ leaderboards: highest energy and water foods, hardest-hitting ammo by health and shock damage, best insulating clothing, quietest weapons.">
+  <h1>Rankings</h1>
+  <p class="muted">Leaderboards computed from the whole database.</p>
+
+  <div class="grid grid-2" style="margin-top:1.25rem">
+    <div class="card">
+      <h2 style="margin-top:0">Top Energy Food (kcal)</h2>
+      <table><tbody>
+        {topEnergy.map((x) => (
+          <tr>
+            <td>{x.icon_file ? <img src={`/icons/${x.icon_file}`} alt="" width="24" height="24" loading="lazy" /> : null}</td>
+            <td><a href={`/food/${x.slug}/`}>{x.title}</a></td>
+            <td style="font-weight:700">{x.v}</td>
+          </tr>
+        ))}
+      </tbody></table>
+    </div>
+    <div class="card">
+      <h2 style="margin-top:0">Top Water Food (ml)</h2>
+      <table><tbody>
+        {topWater.map((x) => (
+          <tr>
+            <td>{x.icon_file ? <img src={`/icons/${x.icon_file}`} alt="" width="24" height="24" loading="lazy" /> : null}</td>
+            <td><a href={`/food/${x.slug}/`}>{x.title}</a></td>
+            <td style="font-weight:700">{x.v}</td>
+          </tr>
+        ))}
+      </tbody></table>
+    </div>
+    <div class="card">
+      <h2 style="margin-top:0">Ammo by Health Damage</h2>
+      <table><tbody>
+        {topAmmo.map((x) => (
+          <tr>
+            <td>{x.icon_file ? <img src={`/icons/${x.icon_file}`} alt="" width="24" height="24" loading="lazy" /> : null}</td>
+            <td><a href={`/ammo/${x.slug}/`}>{x.title}</a></td>
+            <td style="font-weight:700">{x.v}</td>
+          </tr>
+        ))}
+      </tbody></table>
+    </div>
+    <div class="card">
+      <h2 style="margin-top:0">Ammo by Shock Damage</h2>
+      <table><tbody>
+        {topAmmoShock.map((x) => (
+          <tr>
+            <td>{x.icon_file ? <img src={`/icons/${x.icon_file}`} alt="" width="24" height="24" loading="lazy" /> : null}</td>
+            <td><a href={`/ammo/${x.slug}/`}>{x.title}</a></td>
+            <td style="font-weight:700">{x.v}</td>
+          </tr>
+        ))}
+      </tbody></table>
+    </div>
+    <div class="card">
+      <h2 style="margin-top:0">Best Insulating Clothing</h2>
+      <table><tbody>
+        {topInsul.map((x) => (
+          <tr>
+            <td>{x.icon_file ? <img src={`/icons/${x.icon_file}`} alt="" width="24" height="24" loading="lazy" /> : null}</td>
+            <td><a href={`/clothing/${x.slug}/`}>{x.title}</a></td>
+            <td style="font-weight:700">{x.v}</td>
+          </tr>
+        ))}
+      </tbody></table>
+    </div>
+    <div class="card">
+      <h2 style="margin-top:0">Quiet Weapons</h2>
+      <table><tbody>
+        {quietest.map((x) => (
+          <tr>
+            <td>{x.icon_file ? <img src={`/icons/${x.icon_file}`} alt="" width="24" height="24" loading="lazy" /> : null}</td>
+            <td><a href={`/weapons/${x.slug}/`}>{x.title}</a></td>
+            <td style="font-weight:700">{x.fields?.noise}</td>
+          </tr>
+        ))}
+      </tbody></table>
+    </div>
+  </div>
+
+  <Related
+    links={[
+      { href: "/food/", title: "Food & Nutrition", sub: "All food values" },
+      { href: "/ammo/", title: "Ammo Chart", sub: "All calibers" },
+      { href: "/food-calculator/", title: "Food Calculator", sub: "Plan your intake", tool: true },
+    ]}
+  />
+</Base>

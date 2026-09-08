@@ -1,0 +1,51 @@
+---
+import Base from "../../layouts/Base.astro";
+import DataTable from "../../components/DataTable.astro";
+import Related from "../../components/Related.astro";
+import ammo from "../../data/dayz_ammo.json";
+
+const fv = (it, k) => {
+  const v = parseFloat(it.fields?.[k] ?? "");
+  return isNaN(v) ? "" : v;
+};
+const rows = ammo
+  .map((x) => ({
+    name: `<a href="/ammo/${x.slug}/">${x.title}</a>${x.icon_file ? ` <img src="/icons/${x.icon_file}" alt="" width="22" height="22" style="vertical-align:middle" loading="lazy" />` : ""}`,
+    _sort: x.title.toLowerCase(),
+    hd: fv(x, "healthdmg"),
+    bd: fv(x, "blooddmg"),
+    sd: fv(x, "shockdmg"),
+    pen: fv(x, "penetration"),
+    speed: fv(x, "typspeed"),
+    stack: (x.fields?.stack || "").replace(" Rounds", ""),
+  }))
+  .sort((a: any, b: any) => (b.hd || 0) - (a.hd || 0));
+---
+<Base
+  title={`DayZ Ammo Damage Chart — ${ammo.length} calibers with health, shock & blood damage`}
+  description={`DayZ ammo chart: health, blood and shock damage, penetration and muzzle speed for ${ammo.length} calibers, sorted by damage.`}
+>
+  <h1>DayZ Ammo Damage Chart</h1>
+  <p class="muted">{ammo.length} calibers · sorted by health damage. Click a column to re-sort.</p>
+  <DataTable
+    id="ammo"
+    rows={rows as any}
+    searchPlaceholder="Search caliber..."
+    columns={[
+      { key: "name", label: "Ammo" },
+      { key: "hd", label: "Health dmg", type: "number" },
+      { key: "bd", label: "Blood dmg", type: "number" },
+      { key: "sd", label: "Shock dmg", type: "number" },
+      { key: "pen", label: "Penetration", type: "number" },
+      { key: "speed", label: "Speed (m/s)", type: "number" },
+      { key: "stack", label: "Stack" },
+    ]}
+  />
+  <Related
+    links={[
+      { href: "/weapons/", title: "All Weapons", sub: "Which gun takes which caliber" },
+      { href: "/magazines/", title: "Magazines", sub: "Capacity per caliber" },
+      { href: "/rankings/", title: "Rankings", sub: "Leaderboards" },
+    ]}
+  />
+</Base>

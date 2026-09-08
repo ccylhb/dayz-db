@@ -1,0 +1,33 @@
+{
+  "siteName": "DayZDB",
+  "siteUrl": "https://dayz-db.pages.dev",
+  "tagline": "DayZ database — food nutrition, ammo damage & gear",
+  "description": "DayZ stats: food energy, water and stomach values, ammo damage and penetration, magazine capacities, weapon stats and clothing insulation — with a food calculator.",
+  "adsenseClientId": "ca-pub-3245910354455258",
+  "adsensePublisherId": "pub-3245910354455258",
+  "favicon": "🧭",
+  "footerNote": "Unofficial fan-made database for DayZ. Not affiliated with Bohemia Interactive.",
+  "theme": {
+    "bg": "#12140f",
+    "bgSoft": "#1a1d16",
+    "card": "#1e2218",
+    "border": "#353a2c",
+    "text": "#e4e6dc",
+    "muted": "#9aa08c",
+    "accent": "#9dbb63",
+    "accent2": "#b7d07e",
+    "good": "#7fb069",
+    "bad": "#c75146"
+  },
+  "nav": [
+    { "href": "/food/", "label": "Food" },
+    { "href": "/weapons/", "label": "Weapons" },
+    { "href": "/ammo/", "label": "Ammo" },
+    { "href": "/magazines/", "label": "Magazines" },
+    { "href": "/clothing/", "label": "Clothing" },
+    { "href": "/equipment/", "label": "Equipment" },
+    { "href": "/rankings/", "label": "Rankings" },
+    { "href": "/food-calculator/", "label": "Food Calculator", "tool": true },
+    { "href": "/search/", "label": "A-Z" }
+  ]
+}

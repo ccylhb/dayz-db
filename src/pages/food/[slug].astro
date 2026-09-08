@@ -1,0 +1,46 @@
+---
+import Base from "../../layouts/Base.astro";
+import Related from "../../components/Related.astro";
+import EntryStats from "../../components/EntryStats.astro";
+import food from "../../data/dayz_food.json";
+
+export function getStaticPaths() {
+  return food.map((x) => ({ params: { slug: x.slug }, props: { x } }));
+}
+
+const { x } = Astro.props as any;
+const f = x.fields || {};
+const similar = food
+  .filter((o: any) => o.slug !== x.slug && (o.fields?.category || "") === (f.category || ""))
+  .slice(0, 6);
+---
+<Base
+  title={`${x.title} — DayZ food stats (energy ${f.energy || "?"}, water ${f.water || "?"})`}
+  description={`${x.title}: ${f.energy || "?"} kcal energy, ${f.water || "?"} ml water, ${f.stomach || "?"} stomach — DayZ nutritional values${f.variant ? ` for variants: ${f.variant}` : ""}.`}
+>
+  <h1 class="icon-h1">
+    {x.icon_file ? <img src={`/icons/${x.icon_file}`} alt={x.title} loading="eager" /> : null}
+    <span>{x.title}</span>
+  </h1>
+  {f.description && <p class="muted">{f.description}</p>}
+  <EntryStats entry={x} keys={["energy", "water", "stomach", "quantity", "weight", "size"]} labels={{ energy: "Energy (kcal)", water: "Water (ml)", stomach: "Stomach", quantity: "Quantity" }} />
+  <p>
+    {f.category && <span class="tag" style="margin:0.1rem">{f.category}</span>}
+    {f.variant && <span class="tag" style="margin:0.1rem">Variants: {f.variant}</span>}
+    {f.rarity && <span class="tag" style="margin:0.1rem">{f.rarity}</span>}
+  </p>
+  {f.location && <p><strong>Where to find:</strong> {f.location}</p>}
+  {x.intro && <p>{x.intro}</p>}
+  <Related
+    links={[
+      ...similar.map((s: any) => ({
+        href: `/food/${s.slug}/`,
+        title: s.title,
+        sub: `Energy ${s.fields?.energy || "?"} · Water ${s.fields?.water || "?"}`,
+        icon: s.icon_file ? `/icons/${s.icon_file}` : undefined,
+      })),
+      { href: "/food/", title: "All Food", sub: "Sortable nutrition table" },
+      { href: "/food-calculator/", title: "Food Calculator", sub: "Plan your intake", tool: true },
+    ]}
+  />
+</Base>

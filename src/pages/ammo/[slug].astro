@@ -1,0 +1,45 @@
+---
+import Base from "../../layouts/Base.astro";
+import Related from "../../components/Related.astro";
+import EntryStats from "../../components/EntryStats.astro";
+import ammo from "../../data/dayz_ammo.json";
+
+export function getStaticPaths() {
+  return ammo.map((x) => ({ params: { slug: x.slug }, props: { x } }));
+}
+
+const { x } = Astro.props as any;
+const f = x.fields || {};
+const similar = ammo.filter((o: any) => o.slug !== x.slug).slice(0, 6);
+---
+<Base
+  title={`${x.title} — DayZ ammo stats (health ${f.healthdmg || "?"}, shock ${f.shockdmg || "?"})`}
+  description={`${x.title}: ${f.healthdmg || "?"} health damage, ${f.blooddmg || "?"} blood, ${f.shockdmg || "?"} shock, penetration ${f.penetration || "?"} — DayZ ammo stats.`}
+>
+  <h1 class="icon-h1">
+    {x.icon_file ? <img src={`/icons/${x.icon_file}`} alt={x.title} loading="eager" /> : null}
+    <span>{x.title}</span>
+  </h1>
+  {f.description && <p class="muted">{f.description}</p>}
+  <EntryStats entry={x} keys={["healthdmg", "blooddmg", "shockdmg", "penetration", "initspeed", "typspeed", "stack", "weight", "size"]} labels={{ healthdmg: "Health dmg", blooddmg: "Blood dmg", shockdmg: "Shock dmg", initspeed: "Init speed (m/s)", typspeed: "Typ speed (m/s)" }} />
+  <p>
+    {f.category && <span class="tag" style="margin:0.1rem">{f.category}</span>}
+    {f.supersonic && <span class="tag" style="margin:0.1rem">Supersonic: {f.supersonic}</span>}
+    {f.rarity && <span class="tag" style="margin:0.1rem">{f.rarity}</span>}
+  </p>
+  {f.weapon && <p><strong>Used by:</strong> {f.weapon}</p>}
+  {f.location && <p><strong>Where to find:</strong> {f.location}</p>}
+  {x.intro && <p>{x.intro}</p>}
+  <Related
+    links={[
+      ...similar.map((s: any) => ({
+        href: `/ammo/${s.slug}/`,
+        title: s.title,
+        sub: `Health ${s.fields?.healthdmg || "?"} · Shock ${s.fields?.shockdmg || "?"}`,
+        icon: s.icon_file ? `/icons/${s.icon_file}` : undefined,
+      })),
+      { href: "/ammo/", title: "Ammo Chart", sub: "All calibers sorted by damage" },
+      { href: "/weapons/", title: "All Weapons", sub: "Which gun uses it" },
+    ]}
+  />
+</Base>

@@ -1,0 +1,72 @@
+---
+import Base from "../layouts/Base.astro";
+import Related from "../components/Related.astro";
+import food from "../data/dayz_food.json";
+import weapons from "../data/dayz_weapons.json";
+import ammo from "../data/dayz_ammo.json";
+import clothing from "../data/dayz_clothing.json";
+import equipment from "../data/dayz_equipment.json";
+import magazines from "../data/dayz_magazines.json";
+
+const total = food.length + weapons.length + ammo.length + clothing.length + equipment.length + magazines.length;
+const f = (it, k) => parseFloat(it.fields?.[k] ?? "");
+const bestFood = food
+  .map((x) => ({ ...x, energy: f(x, "energy"), water: f(x, "water") }))
+  .sort((a, b) => (b.energy || 0) - (a.energy || 0))[0];
+const bestAmmo = ammo
+  .map((x) => ({ ...x, hd: f(x, "healthdmg") }))
+  .sort((a, b) => (b.hd || 0) - (a.hd || 0))[0];
+---
+<Base title="DayZDB — DayZ food nutrition, ammo damage & gear stats" description={`DayZ stats database: ${total} entries — food energy/water/stomach values, ammo damage & penetration, weapon stats, clothing and equipment with a survival food calculator.`}>
+  <div style="text-align:center;margin:2.5rem 0 2rem">
+    <h1 style="font-size:clamp(2.2rem,6vw,3.4rem)">Survive by the numbers.</h1>
+    <p class="muted" style="font-size:1.15rem;max-width:640px;margin:0.75rem auto">
+      {total} DayZ entries with exact values — what to eat, what to shoot, what to wear. Every stat, no fluff.
+    </p>
+    <p style="margin-top:1.5rem">
+      <a href="/food/" style="display:inline-block;background:var(--accent);color:var(--bg);font-weight:700;padding:0.7rem 1.4rem;border-radius:10px;margin:0.25rem">Food & nutrition</a>
+      <a href="/food-calculator/" style="display:inline-block;border:1px solid var(--accent);color:var(--accent);font-weight:700;padding:0.7rem 1.4rem;border-radius:10px;margin:0.25rem">Food Calculator</a>
+    </p>
+  </div>
+
+  <div class="grid grid-3" style="margin:2rem 0">
+    <a class="card" href="/food/" style="color:inherit">
+      <div class="stat-num">{food.length}</div>
+      <div class="stat-label">Food & drink · nutrition</div>
+      <p class="muted" style="font-size:0.9rem">Energy, water and stomach per item — raw to rotten, all variants.</p>
+    </a>
+    <a class="card" href="/ammo/" style="color:inherit">
+      <div class="stat-num">{ammo.length}</div>
+      <div class="stat-label">Ammo types · damage</div>
+      <p class="muted" style="font-size:0.9rem">Health/blood/shock damage, penetration and speed for every caliber.</p>
+    </a>
+    <a class="card" href="/weapons/" style="color:inherit">
+      <div class="stat-num">{weapons.length}</div>
+      <div class="stat-label">Weapons · stats</div>
+      <p class="muted" style="font-size:0.9rem">Rate of fire, recoil, noise, size and weight for every weapon.</p>
+    </a>
+  </div>
+
+  <h2>Jump to the answer</h2>
+  <div class="card answer-card">
+    <ul style="margin:0;padding-left:1.2rem;line-height:2">
+      <li>Most energetic food: <a href={`/food/${bestFood?.slug}/`}>{bestFood?.title}</a> — {bestFood?.energy} energy{bestFood?.water ? `, ${bestFood.water} water` : ""}</li>
+      <li>Hard-hitting ammo: <a href={`/ammo/${bestAmmo?.slug}/`}>{bestAmmo?.title}</a> — {bestAmmo?.hd} health damage</li>
+      <li>Magazines: <a href="/magazines/">{magazines.length} mags</a> with capacities · Clothing: <a href="/clothing/">{clothing.length} pieces</a> · Equipment: <a href="/equipment/">{equipment.length} items</a></li>
+    </ul>
+  </div>
+
+  <Related
+    heading="All boards"
+    links={[
+      { href: "/food/", title: "Food & Drink", sub: `${food.length} entries` },
+      { href: "/weapons/", title: "Weapons", sub: `${weapons.length} entries` },
+      { href: "/ammo/", title: "Ammo", sub: `${ammo.length} calibers` },
+      { href: "/magazines/", title: "Magazines", sub: `${magazines.length} entries` },
+      { href: "/clothing/", title: "Clothing", sub: `${clothing.length} entries` },
+      { href: "/equipment/", title: "Equipment", sub: `${equipment.length} entries` },
+      { href: "/rankings/", title: "Rankings", sub: "Leaderboards" },
+      { href: "/food-calculator/", title: "Food Calculator", sub: "Plan your survival diet", tool: true },
+    ]}
+  />
+</Base>
