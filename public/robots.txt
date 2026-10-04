@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://dayz-db.pages.dev/sitemap.xml
+Sitemap: https://dayz.lootseer.com/sitemap.xml

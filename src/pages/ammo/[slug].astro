@@ -3,6 +3,7 @@ import Base from "../../layouts/Base.astro";
 import Related from "../../components/Related.astro";
 import EntryStats from "../../components/EntryStats.astro";
 import ammo from "../../data/dayz_ammo.json";
+import { cl, pick, desc, stats, introSentence, best } from "../../lib/seo";
 
 export function getStaticPaths() {
   return ammo.map((x) => ({ params: { slug: x.slug }, props: { x } }));
@@ -11,10 +12,25 @@ export function getStaticPaths() {
 const { x } = Astro.props as any;
 const f = x.fields || {};
 const similar = ammo.filter((o: any) => o.slug !== x.slug).slice(0, 6);
+
+// SEO: concrete values only — the old template emitted "?" for every missing field.
+const description =
+  desc(
+    `${x.title}:`,
+    stats(
+      cl(f.healthdmg) && `health damage ${cl(f.healthdmg)}`,
+      cl(f.blooddmg) && `blood damage ${cl(f.blooddmg)}`,
+      cl(f.shockdmg) && `shock damage ${cl(f.shockdmg)}`,
+      cl(f.penetration) && `penetration ${cl(f.penetration)}`,
+      cl(f.initspeed) && `muzzle velocity ${cl(f.initspeed)} m/s`,
+      cl(f.weight) && `weight ${cl(f.weight)} g`
+    ),
+    "DayZ ammo stats."
+  );
 ---
 <Base
   title={`${x.title} — DayZ ammo stats (health ${f.healthdmg || "?"}, shock ${f.shockdmg || "?"})`}
-  description={`${x.title}: ${f.healthdmg || "?"} health damage, ${f.blooddmg || "?"} blood, ${f.shockdmg || "?"} shock, penetration ${f.penetration || "?"} — DayZ ammo stats.`}
+  description={description}
 >
   <h1 class="icon-h1">
     {x.icon_file ? <img src={`/icons/${x.icon_file}`} alt={x.title} loading="eager" /> : null}

@@ -3,6 +3,7 @@ import Base from "../../layouts/Base.astro";
 import Related from "../../components/Related.astro";
 import EntryStats from "../../components/EntryStats.astro";
 import entries from "../../data/dayz_magazines.json";
+import { cl, pick, desc, stats, introSentence, best } from "../../lib/seo";
 
 export function getStaticPaths() {
   return entries.map((x: any) => ({ params: { slug: x.slug }, props: { x } }));
@@ -11,10 +12,24 @@ export function getStaticPaths() {
 const { x } = Astro.props as any;
 const f = x.fields || {};
 const similar = entries.filter((o: any) => o.slug !== x.slug).slice(0, 6);
+
+// SEO: lead with concrete stats; fall back to the scraped intro sentence.
+const description =
+  desc(
+    `${x.title}:`,
+    stats(
+      cl(f.capacity) && `${cl(f.capacity)} magazine`,
+      pick(f.ammo, f.usedin, f.weapon) && `for ${pick(f.ammo, f.usedin, f.weapon)}`,
+      cl(f.size) && `size ${cl(f.size)}`,
+      cl(f.weight) && `weight ${cl(f.weight)} g`
+    ),
+    cl(f.location) && `Loot: ${cl(f.location)}.`,
+    "DayZ magazine stats and capacity."
+  ) || introSentence(x.intro);
 ---
 <Base
   title=`${x.title} — DayZ magazines stats`
-  description=`${x.title}: DayZ magazines stats and details.`
+  description={description}
 >
   <h1 class="icon-h1">
     {x.icon_file ? <img src={`/icons/${x.icon_file}`} alt={x.title} loading="eager" /> : null}

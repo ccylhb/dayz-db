@@ -33,6 +33,27 @@ LIST_PAGES = {}
 
 num_re = re.compile(r"-?\d+(?:\.\d+)?")
 
+# --- wiki 魔术字展开 ---------------------------------------------------------
+# clean() 用 re.sub(r"\{\{[^{}]*\}\}", "", v) 整段删无名模板，{{PAGENAME}}
+# （物品名）随之消失，正文出现 "The is a large-sized backpack in DayZ." 残句。
+# 必须在清洗前把魔术字换成真实文本。
+_MAGIC_TITLE = re.compile(r"\{\{\s*(?:SUB|BASE|FULL)?PAGENAME(?:E)?\s*\}\}", re.I)
+_MAGIC_GAME = re.compile(r"\{\{\s*(?:Gamename|Game|SITENAME|Sitename)\s*\}\}", re.I)
+_MAGIC_DROP = re.compile(
+    r"\{\{\s*(?:DISPLAYTITLE|DEFAULTSORT|#(?:expr|var|if|ifeq|ifexist|switch|tag|invoke|time|pos|len|replace|sub|explode|titleparts)[^}]*)\}\}",
+    re.I,
+)
+
+
+def expand_magic(wt, title):
+    """把 {{PAGENAME}} 换成页面标题，丢弃解析器函数/元魔术字残留。"""
+    if not wt:
+        return wt
+    wt = _MAGIC_TITLE.sub(lambda _m: title, wt)
+    wt = _MAGIC_GAME.sub("DayZ", wt)
+    wt = _MAGIC_DROP.sub("", wt)
+    return wt
+
 
 def num(v):
     if v is None:
@@ -140,15 +161,46 @@ def clean(v):
     v = re.sub(r"\[(https?://\S+)\s+([^\]]+)\]", r"\2", v)
     v = re.sub(r"\[(https?://\S+)\]", "", v)
     v = v.replace("'''", "").replace("''", "")
+    # 兜底：清掉被截断的模板尾巴与孤立括号（残留形如 '… Hunger. }'）
+    v = re.sub(r"\{\{[^{}]*$", "", v)
+    v = v.replace("}", "").replace("{", "")
     return re.sub(r"\s+", " ", v).strip()
+
+
+def strip_leading_templates(text):
+    """跳过开头的 {{...}} 模板块（支持嵌套），返回其后文本。
+
+    原实现只切到第一个 '}}'，遇到嵌套模板（infobox 内含子模板）会切在模板内部，
+    正文取到 '}}'，intro 变成两个花括号。这里按括号深度整块剥离。
+    """
+    i, n = 0, len(text)
+    while i < n:
+        while i < n and text[i] in " \t\r\n":
+            i += 1
+        if text.startswith("{{", i):
+            depth, j = 0, i
+            while j < n:
+                if text.startswith("{{", j):
+                    depth += 1
+                    j += 2
+                    continue
+                if text.startswith("}}", j):
+                    depth -= 1
+                    j += 2
+                    if depth == 0:
+                        break
+                    continue
+                j += 1
+            i = j
+            continue
+        break
+    return text[i:]
 
 
 def first_para(wt):
     body = strip_comments(wt)
-    # drop infobox region
-    m = re.search(r"\}\}", body)
-    if m:
-        body = body[m.end():]
+    # drop leading template block(s) (lead notices + infobox)
+    body = strip_leading_templates(body)
     for ln in body.splitlines():
         ln = ln.strip()
         if ln and not ln.startswith(("=", "{", "|", "[[", "<", "#")):
@@ -246,6 +298,8 @@ def main():
     print(f"[total] {len(all_titles)} unique pages")
     cache = os.path.join(CACHE_DIR, "wikitexts.json")
     wts = fetch_wikitexts(all_titles, cache)
+    # 2.5) 展开魔术字（缓存保持原始，每次解析都重展开，便于回滚）
+    wts = {t: expand_magic(wt, t) for t, wt in wts.items()}
     # 3) route + parse (first infobox wins; board by source)
     for board, titles in board_titles.items():
         out = []

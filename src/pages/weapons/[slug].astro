@@ -3,6 +3,7 @@ import Base from "../../layouts/Base.astro";
 import Related from "../../components/Related.astro";
 import EntryStats from "../../components/EntryStats.astro";
 import weapons from "../../data/dayz_weapons.json";
+import { cl, pick, desc, stats, introSentence, best } from "../../lib/seo";
 
 export function getStaticPaths() {
   return weapons.map((x) => ({ params: { slug: x.slug }, props: { x } }));
@@ -13,10 +14,24 @@ const f = x.fields || {};
 const similar = weapons
   .filter((o: any) => o.slug !== x.slug && (o.fields?.category || "") === (f.category || ""))
   .slice(0, 6);
+
+// SEO: concrete values only — the old template emitted "?" for every missing field.
+const description =
+  desc(
+    `${x.title}:`,
+    cl(f.category) && `${cl(f.category)} —`,
+    stats(
+      cl(f.mode) && `fire mode ${cl(f.mode)}`,
+      cl(f.rateoffire) && `rate of fire ${cl(f.rateoffire)}`,
+      cl(f.recoil) && `recoil ${cl(f.recoil)}`,
+      cl(f.weight) && `weight ${cl(f.weight)} g`
+    ),
+    "DayZ weapon stats."
+  ) || introSentence(x.intro);
 ---
 <Base
   title={`${x.title} — DayZ weapon stats`}
-  description={`${x.title}: ${f.category || "weapon"} — fire mode ${f.mode || "?"}, rate of fire ${f.rateoffire || "?"}, recoil ${f.recoil || "?"}, weight ${f.weight || "?"} g. DayZ weapon stats.`}
+  description={description}
 >
   <h1 class="icon-h1">
     {x.icon_file ? <img src={`/icons/${x.icon_file}`} alt={x.title} loading="eager" /> : null}
