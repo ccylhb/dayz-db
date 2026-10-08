@@ -20,14 +20,68 @@
     "bad": "#c75146"
   },
   "nav": [
-    { "href": "/food/", "label": "Food" },
-    { "href": "/weapons/", "label": "Weapons" },
-    { "href": "/ammo/", "label": "Ammo" },
-    { "href": "/magazines/", "label": "Magazines" },
-    { "href": "/clothing/", "label": "Clothing" },
-    { "href": "/equipment/", "label": "Equipment" },
-    { "href": "/rankings/", "label": "Rankings" },
-    { "href": "/food-calculator/", "label": "Food Calculator", "tool": true },
-    { "href": "/search/", "label": "A-Z" }
-  ]
+    {
+      "href": "/food/",
+      "label": "Food"
+    },
+    {
+      "href": "/weapons/",
+      "label": "Weapons"
+    },
+    {
+      "href": "/ammo/",
+      "label": "Ammo"
+    },
+    {
+      "href": "/magazines/",
+      "label": "Magazines"
+    },
+    {
+      "href": "/clothing/",
+      "label": "Clothing"
+    },
+    {
+      "href": "/equipment/",
+      "label": "Equipment"
+    },
+    {
+      "href": "/rankings/",
+      "label": "Rankings"
+    },
+    {
+      "href": "/food-calculator/",
+      "label": "Food Calculator",
+      "tool": true
+    },
+    {
+      "href": "/search/",
+      "label": "A-Z"
+    }
+  ],
+  "sisterSites": [
+    {
+      "name": "BellwrightDB",
+      "url": "https://bellwright.lootseer.com",
+      "blurb": "Armour ratings with movement-speed penalties side by side."
+    },
+    {
+      "name": "FactorioDB",
+      "url": "https://factorio.lootseer.com",
+      "blurb": "Recipes with exact craft times and ingredient counts."
+    },
+    {
+      "name": "DiverDB",
+      "url": "https://diverdb.lootseer.com",
+      "blurb": "Fish farming stats, recipe filters and staff comparisons."
+    },
+    {
+      "name": "RimWorldDB",
+      "url": "https://rimworld.lootseer.com",
+      "blurb": "Weapon DPS, apparel armour, nutrition and animal combat power."
+    }
+  ],
+  "hubSite": {
+    "name": "LootSeer",
+    "url": "https://lootseer.com"
+  }
 }
