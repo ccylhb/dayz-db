@@ -165,7 +165,7 @@
  ],
  [
   "30_rnd_22_mag.png",
-  "fail:<urlopen error [SSL: UNEXPECTED_EOF_WHILE_READING]"
+  "fail:HTTP Error 404: Not Found"
  ],
  [
   "30rd_Vikhr_Mag.png",
